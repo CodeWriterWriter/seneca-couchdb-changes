@@ -1,0 +1,16 @@
+{
+  "name": "seneca-couchdb-changes",
+  "version": "0.0.1",
+  "description": "Emit seneca.js events for all events in a couchdb _changes feed",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "keywords": [
+    "seneca",
+    "microservice",
+    "couchdb"
+  ],
+  "author": "Adrian Rossouw",
+  "license": "MIT"
+}
