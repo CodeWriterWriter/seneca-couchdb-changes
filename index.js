@@ -1,18 +1,21 @@
 /* jshint indent: 2, asi: true */
 // vim: noai:ts=2:sw=2
 
-var _ = require('underscore');
+var url    = require('url');
+var assert = require('assert');
 var follow = require('follow');
+var _      = require('underscore');
 
 var _name  = 'seneca-couchdb-changes';
 
 function changes(opts, register) {
   var seneca = this;
 
+  assert.ok(opts.db);
+
   _.defaults(opts, {
-    db: 'http://localhost:5984/registry',
-    seqenceEntity: 'sequence',
-    sequenceName: 'registry'
+    entity : 'sequence',
+    name   : url.parse(opts.db).path.replace(/^\//,'')
   });
 
   var couchOpts = {
@@ -31,18 +34,17 @@ function changes(opts, register) {
     _changes.pause();
 
     var cmd = {
-      role: 'couchdb',
-      cmd: 'change',
-      base: opts.sequenceName,
-      doc: data.doc,
-      _id: data._id,
-      _seq: data.seq,
-      default$: {}
+      role : 'couchdb',
+      cmd  : 'change',
+      base : opts.name,
+      doc  : data.doc,
+      id   : data._id,
+      seq  : data.seq
     };
 
-    seneca.act(cmd);
-    entityStore(data);
-    _changes.resume();
+    seneca.act(cmd, function(err, args) {
+      entityStore(data);
+    });
   }
 
   function onError(error) {
@@ -50,9 +52,11 @@ function changes(opts, register) {
   }
 
   function entityStore(data) {
-    var seqEntity = seneca.make(opts.sequenceEntity);
-    seqEntity.id = opts.sequenceName;
+    var seqEntity   = seneca.make(opts.entity);
+    seqEntity.id    = opts.name;
+    seqEntity.name  = opts.name;
     seqEntity.seqId = data.seq;
+
     seqEntity.save$(function(err, entity) {
       if (err) { console.log(err); }
       _changes.resume();
