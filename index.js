@@ -23,10 +23,7 @@ function changes(opts, register) {
   // defaults for the main opts
   _.defaults(opts, {
     entity           : 'sequence',
-    filter           : undefined,
-    heartbeat        : undefined,
-    inactivity_ms    : undefined,
-    query_params     : undefined,
+    heartbeat        : 30000,
     name             : url.parse(opts.db).path.replace(/^\//,'')
   });
 
@@ -35,11 +32,12 @@ function changes(opts, register) {
   var couchOpts = {
     db              : opts.db,
     include_docs    : true,
-    filter          : opts.filter,
-    heartbeat       : opts.heartbeat,
-    inactivity_ms   : opts.inactivity_ms,
-    query_params    : opts.query_params
   };
+
+  opts.heartbeat     && (couchOpts.heartbeat     = opts.heartbeat);
+  opts.inactivity_ms && (couchOpts.inactivity_ms = opts.inactivity_ms);
+  opts.query_params  && (couchOpts.query_params  = opts.query_params);
+  opts.filter        && (couchOpts.filter        = opts.filter);
 
   // create a new follow object.
   //
